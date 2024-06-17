@@ -1,5 +1,5 @@
-KOBJS  = kstart.o kuserblob.o kernel.o libc.o list.o
-UOBJS  = ustart.o umain.o fibonacci.o corre_letras.o
+KERNEL_OBJS  = kernel-entry.o kuserblob.o kernel.o libc.o list.o
+USER_OBJS  = user-entry.o umain.o fibonacci.o corre_letras.o
 
 CFLAGS = -O0 -fno-builtin
 
@@ -7,10 +7,10 @@ all: kernel.code.bin kernel.data.bin kernel.user.bin kernel.code.hex kernel.data
 
 kuserblob.o: user.code.bin user.data.bin
 
-kernel.elf: $(KOBJS)
-	sisa-ld -T kernel.ld $(KOBJS) -o $@
+kernel.elf: $(KERNEL_OBJS)
+	sisa-ld -T kernel.ld $(KERNEL_OBJS) -o $@
 
-user.elf: $(UOBJS)
+user.elf: $(USER_OBJS)
 	sisa-ld -T user.ld $^ -o $@
 
 .c.o:
@@ -38,7 +38,8 @@ udisasm: user.elf
 	@sisa-objdump -d $<
 
 clean:
-	@rm -f $(KOBJS) $(UOBJS) kernel.elf user.elf \
+	@rm -f $(KERNEL_OBJS) $(USER_OBJS) \
+	kernel.elf user.elf \
 	kernel.code.hex kernel.data.hex kernel.user.hex \
 	kernel.code.bin kernel.data.bin kernel.user.bin \
 	user.code.bin user.data.bin \
