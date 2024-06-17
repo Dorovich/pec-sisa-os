@@ -5,48 +5,6 @@
 #include "libc.h"
 #include "list.h"
 
-/* Memory map (physical)
- * +--------+_0xFFFF   ^
- * |        |          |
- * |        |          | ROM
- * |        |          |
- * | KCODE  |_0xC000   ∨
- * |  VGA   |
- * |  VGA   |_0xA000   ^
- * | KSTACK |          |
- * | KDATA  |_0x8000   |
- * |        |          |
- * |        |          |
- * |        |          |
- * |        |          | SRAM_ACCESSIBLE
- * |        |          |
- * |        |          |
- * |        |          |
- * | 0-page |_0x0000   v
- * +--------+
- */
-
-/* Memory map (virtual)
- * +--------+_0xFFFF
- * |        |
- * |        |
- * |   ^    |
- * | KCODE  |_0xC000
- * |        |
- * |        |_0xA000
- * | KSTACK |
- * | KDATA  |_0x8000
- * |        |
- * |        |
- * |        |
- * |        |
- * |   ^    |
- * | UDATA  |
- * | UCODE  |
- * | 0-page |_0x0000
- * +--------+
- */
-
 extern void _user_code_start;
 extern void _user_code_end;
 extern void _user_data_start;
@@ -84,8 +42,6 @@ extern void _kernel_data_end;
 #define NUM_TASKS 3
 
 #define SCHED_DEFAULT_QUANTUM 1
-
-#define KEY_CBUFFER_SIZE 32
 
 struct task_struct {
 	union {

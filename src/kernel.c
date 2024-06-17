@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include "hardware.h"
 
 extern void (*cpu_idle)(void);
 
@@ -10,51 +11,12 @@ static struct task_struct task[NUM_TASKS];
 static struct list_head freequeue;
 static struct list_head readyqueue;
 
-static uint8_t last_pid;
-static uint8_t quantum_rr;
-static uint16_t sisa_ticks;
-
-static struct {
-	char data[KEY_CBUFFER_SIZE];
-	uint8_t head, tail, count;
-} key_cbuffer;
+static uint8_t global_pid;
+static uint8_t global_quantum;
 
 static inline struct task_struct *list_pop_front_task_struct(struct list_head *l)
 {
 	return list_entry(list_pop_front(l), struct task_struct, list);
-}
-
-void timer_routine(void)
-{
-	sisa_ticks++;
-	sched_run();
-}
-
-void key_routine(void)
-{
-
-}
-
-void switch_routine(void)
-{
-
-}
-
-void kb_routine(void)
-{
-	char key_char;
-
-	if (key_cbuffer.count >= KEY_CBUFFER_SIZE)
-		return;
-
-	__asm__(
-		"in %0, 15\n\t"
-		: "=r"(key_char)
-	);
-
-	key_cbuffer.data[key_cbuffer.head] = key_char;
-	key_cbuffer.head = (key_cbuffer.head + 1) % KEY_CBUFFER_SIZE;
-	key_cbuffer.count++;
 }
 
 syscall_value_t sys_fork(void)
@@ -85,27 +47,12 @@ syscall_value_t sys_getpid(void)
 
 syscall_value_t sys_getticks(void)
 {
-	return sisa_ticks;
+	return hw_getticks();
 }
 
 syscall_value_t sys_readkey(void)
 {
-	char key = 0;
-
-	if (key_cbuffer.count > 0) {
-		key = key_cbuffer.data[key_cbuffer.tail];
-		key_cbuffer.tail = (key_cbuffer.tail + 1) % KEY_CBUFFER_SIZE;
-		key_cbuffer.count--;
-	}
-
-	return key;
-}
-
-static void hw_init(void)
-{
-	key_cbuffer.head = 0;
-	key_cbuffer.tail = 0;
-	key_cbuffer.count = 0;
+	return hw_getkey();
 }
 
 static int sched_needs_switch(void)
@@ -122,8 +69,8 @@ static int sched_needs_switch(void)
 		/* If not executing idle_task, switch only if quantum expired
 		 * Does not mind if only there is one user task
 		 */
-		quantum_rr--;
-		if (quantum_rr == 0)
+		global_quantum--;
+		if (global_quantum == 0)
 			return 1;
 		else
 			return 0;
@@ -132,7 +79,7 @@ static int sched_needs_switch(void)
 
 static void sched_task_switch(struct task_struct *next)
 {
-	quantum_rr = next->quantum;
+	global_quantum = next->quantum;
 	current = next;
 }
 
@@ -166,7 +113,7 @@ void sched_run(void)
 
 uint8_t sched_get_free_pid(void)
 {
-	return ++last_pid;
+	return ++global_pid;
 }
 
 static void sched_init_queues(void)
@@ -204,7 +151,7 @@ static void sched_init_task1(void)
 	task1->reg.psw = PSW_IE | PSW_USER_MODE;
 
 	/* Sched starts with quantum from task1 */
-	quantum_rr = task1->quantum;
+	global_quantum = task1->quantum;
 
 	current = task1;
 }
@@ -223,9 +170,7 @@ void sched_init(void)
 	sched_init_task1();
 
 	/* Skip idle and task1 processes */
-	last_pid = 1;
-
-	sisa_ticks = 0;
+	global_pid = 1;
 }
 
 int kernel_main(void)

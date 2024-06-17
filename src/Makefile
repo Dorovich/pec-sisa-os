@@ -1,4 +1,4 @@
-KERNEL_OBJS  = kernel-entry.o kernel-userdata.o kernel.o libc.o list.o
+KERNEL_OBJS  = kernel-entry.o kernel-userdata.o kernel.o hardware.o libc.o list.o
 USER_OBJS  = user-entry.o user.o fibonacci.o corre_letras.o
 
 CFLAGS = -O0 -fno-builtin
