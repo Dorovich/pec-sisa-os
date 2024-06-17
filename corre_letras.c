@@ -1,4 +1,4 @@
-#include "usyscall.h"
+#include "libc.h"
 
 /* This code was done by the PEC professors */
 
@@ -170,7 +170,7 @@ int main1 (void) {
 
         while (1) {
 	    tics_timer = getticks();
-	    tecla_pulsada = readkb();
+	    tecla_pulsada = readkey();
 
             switch (tecla_pulsada)
             {
