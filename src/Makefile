@@ -21,6 +21,7 @@ user.elf: $(USER_OBJS)
 
 %.hex: %.bin
 	@hexdump -ve '1/2 "%.4x\n"' $< > $@
+	@cp $@ ..
 
 %.code.bin: %.elf
 	sisa-objcopy -O binary -j .text $< $@
