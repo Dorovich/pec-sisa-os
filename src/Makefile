@@ -1,45 +1,51 @@
-KERNEL_OBJS  = kernel-entry.o kernel-userdata.o kernel.o hardware.o libc.o list.o
-USER_OBJS  = user-entry.o user.o fibonacci.o corre_letras.o
+KERNOBJ  = kernel-entry.o kernel-userdata.o kernel.o hardware.o libc.o list.o
+USEROBJ  = user-entry.o user.o fibonacci.o corre_letras.o
 
 CFLAGS = -O0 -fno-builtin
+
+CC = sisa-gcc
+AS = sisa-as
+LD = sisa-ld
+OBJCOPY = sisa-objcopy -O binary
+OBJDUMP = sisa-objdump -d
 
 all: kernel.code.bin kernel.data.bin kernel.user.bin kernel.code.hex kernel.data.hex kernel.user.hex
 
 kernel-userdata.o: user.code.bin user.data.bin
 
-kernel.elf: $(KERNEL_OBJS)
-	sisa-ld -T kernel.ld $(KERNEL_OBJS) -o $@
+kernel.elf: $(KERNOBJ)
+	$(LD) -T kernel.ld $(KERNOBJ) -o $@
 
-user.elf: $(USER_OBJS)
-	sisa-ld -T user.ld $^ -o $@
+user.elf: $(USEROBJ)
+	$(LD) -T user.ld $^ -o $@
 
 .c.o:
-	sisa-gcc $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 .s.o:
-	sisa-as $< -o $@
+	$(AS) $< -o $@
 
 %.hex: %.bin
 	@hexdump -ve '1/2 "%.4x\n"' $< > $@
 	@cp $@ ..
 
 %.code.bin: %.elf
-	sisa-objcopy -O binary -j .text $< $@
+	$(OBJCOPY) -j .text $< $@
 
 %.data.bin: %.elf
-	sisa-objcopy -O binary -j .data $< $@
+	$(OBJCOPY) -j .data $< $@
 
 %.user.bin: %.elf
-	sisa-objcopy -O binary --set-section-flags .user=alloc,load -j .user $< $@
+	$(OBJCOPY) --set-section-flags .user=alloc,load -j .user $< $@
 
 kdisasm: kernel.elf
-	@sisa-objdump -d $<
+	@$(OBJDUMP) $<
 
 udisasm: user.elf
-	@sisa-objdump -d $<
+	@$(OBJDUMP) $<
 
 clean:
-	@rm -f $(KERNEL_OBJS) $(USER_OBJS) \
+	@rm -f $(KERNOBJ) $(USEROBJ) \
 	kernel.elf user.elf \
 	kernel.code.hex kernel.data.hex kernel.user.hex \
 	kernel.code.bin kernel.data.bin kernel.user.bin \
