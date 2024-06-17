@@ -52,7 +52,7 @@ syscall_value_t sys_getticks(void)
 
 syscall_value_t sys_readkey(void)
 {
-	return hw_getkey();
+	return hw_readkey();
 }
 
 static int sched_needs_switch(void)

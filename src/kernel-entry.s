@@ -108,9 +108,9 @@ exception_vector_end:
 
 interrupt_vector_start:
 	.word timer_routine
-	.word key_routine
+	.word button_routine
 	.word switch_routine
-	.word kb_routine
+	.word keyboard_routine
 interrupt_vector_end:
 
 syscall_table_start:

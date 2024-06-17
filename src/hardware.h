@@ -15,6 +15,6 @@ struct cbuffer {
 
 void hw_init(void);
 uint16_t hw_getticks(void);
-char hw_getkey(void);
+char hw_readkey(void);
 
 #endif

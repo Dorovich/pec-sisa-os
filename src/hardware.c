@@ -17,7 +17,7 @@ uint16_t hw_getticks(void)
 	return clock_ticks;
 }
 
-char hw_getkey(void)
+char hw_readkey(void)
 {
 	char key = 0;
 
@@ -36,7 +36,7 @@ void timer_routine(void)
 	sched_run();
 }
 
-void key_routine(void)
+void button_routine(void)
 {
 
 }
@@ -46,7 +46,7 @@ void switch_routine(void)
 
 }
 
-void kb_routine(void)
+void keyboard_routine(void)
 {
 	char key_char;
 
