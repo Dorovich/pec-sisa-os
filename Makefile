@@ -1,11 +1,11 @@
-KERNEL_OBJS  = kernel-entry.o kuserblob.o kernel.o libc.o list.o
-USER_OBJS  = user-entry.o umain.o fibonacci.o corre_letras.o
+KERNEL_OBJS  = kernel-entry.o kernel-userdata.o kernel.o libc.o list.o
+USER_OBJS  = user-entry.o user.o fibonacci.o corre_letras.o
 
 CFLAGS = -O0 -fno-builtin
 
 all: kernel.code.bin kernel.data.bin kernel.user.bin kernel.code.hex kernel.data.hex kernel.user.hex
 
-kuserblob.o: user.code.bin user.data.bin
+kernel-userdata.o: user.code.bin user.data.bin
 
 kernel.elf: $(KERNEL_OBJS)
 	sisa-ld -T kernel.ld $(KERNEL_OBJS) -o $@
