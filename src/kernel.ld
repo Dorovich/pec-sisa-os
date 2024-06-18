@@ -5,8 +5,7 @@ ENTRY(_start)
 
 SECTIONS
 {
-	/* Kernel code */
-	. = 0xC000;
+	. = 0xC000; /* Kernel code region */
 	.text : {
 		_kernel_code_start = ABSOLUTE(.);
 		*(.text.start)
@@ -17,15 +16,13 @@ SECTIONS
 		_kernel_code_end = ABSOLUTE(.);
 	}
 
-	/* Kernel data (data, bss and stack) */
-	. = 0x8000;
+	. = 0x8000; /* Kernel data region */
 	_kernel_data_start = ABSOLUTE(.);
 
 	.data : {
 		*(.data)
 		*(.data*)
-		/* FIXME: Remove this hack to force .data to exist */
-		. += 4;
+		. += 8; /* else .data section does not exist */
 	}
 
 	.bss : {
@@ -34,19 +31,15 @@ SECTIONS
 		*(.bss*)
 		_kernel_data_bss_end = ABSOLUTE(.);
 	}
-	/* Give at least 0x100 bytes to the stack */
 	. += 0x100;
-	. = ALIGN(0x1000);
 
 	_kernel_data_end = ABSOLUTE(.);
 
-	/* User */
-	. = 0x1000;
+	. = 0x1000; /* User code & data region */
 	.user : {
 		_user_code_start = ABSOLUTE(.);
 		*(.user.code)
 		_user_code_end = ABSOLUTE(.);
-		. = ALIGN(0x1000);
 		_user_data_start = ABSOLUTE(.);
 		*(.user.data)
 		_user_data_end = ABSOLUTE(.);
