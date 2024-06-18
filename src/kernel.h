@@ -70,4 +70,4 @@ void sched_run(void);
 void sched_schedule(struct list_head *queue);
 uint8_t sched_get_free_pid(void);
 
-#endif
+#endif /* KERNEL_H */
