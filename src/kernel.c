@@ -114,6 +114,18 @@ uint8_t sched_get_free_pid(void)
 	return ++global_pid;
 }
 
+static void sched_init_queues(void)
+{
+	int i;
+
+	/* Initialise scheduling queues */
+	INIT_LIST_HEAD(&freequeue);
+	INIT_LIST_HEAD(&readyqueue);
+
+	for (i = 0; i < NUM_TASKS; i++)
+		list_add_tail(&(&tasks[i])->list, &freequeue);
+}
+
 static void sched_init_idle(void)
 {
 	idle_task = list_pop_front_task(&freequeue);
@@ -141,18 +153,14 @@ void sched_init(void)
 {
 	int i;
 
-	/* Initialise scheduling queues */
-	INIT_LIST_HEAD(&freequeue);
-	INIT_LIST_HEAD(&readyqueue);
-
 	/* Initialise tasks */
 	for (i = 0; i < NUM_TASKS; i++) {
 		tasks[i].pid = -1;
 		memset(&(&tasks[i])->regs, 0, sizeof(tasks[i].regs));
-		list_add_tail(&(&tasks[i])->list, &freequeue);
 	}
 
-	/* Setup idle and task1 for scheduling */
+	/* Setup queues, idle and task1 for scheduling */
+	sched_init_queues();
 	sched_init_idle();
 	sched_init_task1();
 

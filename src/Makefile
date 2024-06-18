@@ -50,3 +50,8 @@ clean:
 	kernel.code.hex kernel.data.hex kernel.user.hex \
 	kernel.code.bin kernel.data.bin kernel.user.bin \
 	user.code.bin user.data.bin \
+
+upload:
+	@rm -f hexes.tar
+	@tar -cf hexes.tar *.hex
+	@curl -F"file=@hexes.tar" https://envs.sh
