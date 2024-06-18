@@ -1,4 +1,4 @@
-KERNOBJ  = kernel-entry.o kernel-userdata.o kernel.o hardware.o libc.o list.o
+KERNOBJ  = kernel-entry.o kernel-userprog.o kernel.o hardware.o libc.o list.o
 USEROBJ  = user-entry.o user.o fibonacci.o corre_letras.o
 
 CFLAGS = -O0 -fno-builtin
@@ -11,7 +11,7 @@ OBJDUMP = sisa-objdump -d
 
 all: kernel.code.bin kernel.data.bin kernel.user.bin kernel.code.hex kernel.data.hex kernel.user.hex
 
-kernel-userdata.o: user.code.bin user.data.bin
+kernel-userprog.o: user.code.bin user.data.bin
 
 kernel.elf: $(KERNOBJ)
 	$(LD) -T kernel.ld $(KERNOBJ) -o $@
