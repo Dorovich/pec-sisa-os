@@ -23,6 +23,7 @@ syscall_value_t sys_fork(void)
 {
 	struct task_struct *new;
 
+	/* Return error when no free tasks remain */
 	if (list_empty(&freequeue))
 		return -1;
 
@@ -31,6 +32,7 @@ syscall_value_t sys_fork(void)
 	/* Copy current task_struct to the new one */
 	memcpy(new, current, sizeof(struct task_struct));
 
+	/* Set return value to 0 and an unused PID */
 	new->reg.r1 = 0;
 	new->pid = sched_get_free_pid();
 
@@ -58,17 +60,13 @@ syscall_value_t sys_readkey(void)
 static int sched_needs_switch(void)
 {
 	if (current->pid == 0) {
-		/* If executing idle_task and there are other tasks waiting
-		 * switch to them, else do nothing.
-		 */
+		/* Stop idling if there are new tasks */
 		if (!list_empty(&readyqueue))
 			return 1;
 		else
 			return 0;
 	} else {
-		/* If not executing idle_task, switch only if quantum expired
-		 * Does not mind if only there is one user task
-		 */
+		/* Reschedule when quantum expires */
 		global_quantum--;
 		if (global_quantum == 0)
 			return 1;
@@ -80,6 +78,7 @@ static int sched_needs_switch(void)
 static void sched_task_switch(struct task_struct *next)
 {
 	global_quantum = next->quantum;
+	/* Context will be restored from new current */
 	current = next;
 }
 
@@ -88,11 +87,11 @@ void sched_schedule(struct list_head *queue)
 	struct task_struct *next;
 
 	if (current->pid != 0) {
-		/* Save current to the appropriate queue */
+		/* Save current and select another task */
 		list_add_tail(&current->list, queue);
 		next = list_pop_front_task_struct(&readyqueue);
 	} else {
-		/* If there's no task in the readyqueue, switch to idle */
+		/* Switch to idle_task if none remain */
 		if (list_empty(&readyqueue))
 			next = idle_task;
 		else
@@ -116,27 +115,13 @@ uint8_t sched_get_free_pid(void)
 	return ++global_pid;
 }
 
-static void sched_init_queues(void)
-{
-	int i;
-
-	INIT_LIST_HEAD(&freequeue);
-	INIT_LIST_HEAD(&readyqueue);
-
-	for (i = 0; i < NUM_TASKS; i++)
-		list_add_tail(&(&task[i])->list, &freequeue);
-}
-
 static void sched_init_idle(void)
 {
 	idle_task = list_pop_front_task_struct(&freequeue);
 
 	idle_task->pid = 0;
-	// Idle task does not have quantum since we task_switch to
-	// any another user task if exists. Anyway we set up to default
 	idle_task->quantum = SCHED_DEFAULT_QUANTUM;
 	idle_task->reg.pc = (uintptr_t)&cpu_idle;
-	/* Interrupts enabled, kernel mode */
 	idle_task->reg.psw = PSW_IE | PSW_KERNEL_MODE;
 }
 
@@ -147,12 +132,10 @@ static void sched_init_task1(void)
 	task1->pid = 1;
 	task1->quantum = SCHED_DEFAULT_QUANTUM;
 	task1->reg.pc = (unsigned int)&_user_code_start;
-	/* Interrups enabled, user mode */
 	task1->reg.psw = PSW_IE | PSW_USER_MODE;
 
-	/* Sched starts with quantum from task1 */
+	/* Set task1 as current task */
 	global_quantum = task1->quantum;
-
 	current = task1;
 }
 
@@ -160,27 +143,35 @@ void sched_init(void)
 {
 	int i;
 
+	/* Initialise tasks */
 	for (i = 0; i < NUM_TASKS; i++) {
 		task[i].pid = -1;
 		memset(&(&task[i])->regs, 0, sizeof(task[i].regs));
 	}
 
-	sched_init_queues();
+	/* Initialise scheduling queues */
+	INIT_LIST_HEAD(&freequeue);
+	INIT_LIST_HEAD(&readyqueue);
+
+	for (i = 0; i < NUM_TASKS; i++)
+		list_add_tail(&(&task[i])->list, &freequeue);
+
+	/* Setup idle and task1 for scheduling */
 	sched_init_idle();
 	sched_init_task1();
 
-	/* Skip idle and task1 processes */
+	/* task1 has PID 1 */
 	global_pid = 1;
 }
 
 int kernel_main(void)
 {
+	/* Initialise hardware and scheduling */
 	hw_init();
 	sched_init();
 
+	/* "Call gate" return */
 	void (*user_entry)(void) = (void (*)(void))(&_user_code_start);
-
-	/* Enable interrupts, user mode and jump to the user code */
 	__asm__(
 		"wrs s0, %0\n\t"
 		"wrs s1, %1\n\t"
