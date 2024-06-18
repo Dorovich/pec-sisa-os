@@ -1,7 +1,5 @@
 #include "libc.h"
 
-/* This code was done by the PEC professors */
-
 /**************************************************************
 * Borra la pantalla: Escribe 80x30 caracteres (espacios con   *
 * fondo negro) en la memoria de la pantalla (0xA000)          *

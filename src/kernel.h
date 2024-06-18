@@ -4,6 +4,7 @@
 
 #include "libc.h"
 #include "list.h"
+#include "hardware.h"
 
 extern void _user_code_start;
 extern void _user_code_end;

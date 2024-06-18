@@ -21,12 +21,12 @@ typedef unsigned int size_t;
 typedef unsigned int uintptr_t;
 typedef unsigned int syscall_value_t;
 
-static inline int _syscall(uint16_t number)
+static inline int _syscall(uint16_t service_number)
 {
 	__asm__(
 		"and r0, %0, %0\n\t"
 		"calls r0\n\t"
-		: : "r"(number)
+		: : "r"(service_number)
 	);
 }
 

@@ -27,7 +27,6 @@ user.elf: $(USEROBJ)
 
 %.hex: %.bin
 	@hexdump -ve '1/2 "%.4x\n"' $< > $@
-	@cp $@ ..
 
 %.code.bin: %.elf
 	$(OBJCOPY) -j .text $< $@

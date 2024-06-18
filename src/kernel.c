@@ -1,5 +1,4 @@
 #include "kernel.h"
-#include "hardware.h"
 
 extern void (*cpu_idle)(void);
 
@@ -103,7 +102,7 @@ void sched_schedule(struct list_head *queue)
 
 void sched_run(void)
 {
-	/* Update task sched attrib. and check if switch needed */
+	/* Update scheduling info, switch task if needed */
 	if (sched_needs_switch()) {
 		sched_schedule(&readyqueue);
 	}

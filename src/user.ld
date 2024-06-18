@@ -14,14 +14,14 @@ SECTIONS
 		*(.rodata*)
 	}
 
-	. = ALIGN(0x0010);
+	. = ALIGN(2);
 	.data : {
 		*(.data)
 		*(.data*)
 		*(.bss)
 		*(.bss*)
 		. += 0x200; /* Minimum stack */
-		. = ALIGN(0x0010);
+		. = ALIGN(2);
 		_user_stack = ABSOLUTE(.);
 	}
 }

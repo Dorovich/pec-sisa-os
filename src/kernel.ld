@@ -22,7 +22,7 @@ SECTIONS
 		*(.data*)
 		. += 1; /* else .data section does not exist */
 	}
-	. = ALIGN(0x0010);
+	. = ALIGN(2);
 	.bss : {
 		_kernel_data_bss_start = ABSOLUTE(.);
 		*(.bss)
@@ -30,7 +30,7 @@ SECTIONS
 		_kernel_data_bss_end = ABSOLUTE(.);
 	}
 	. += 0x400; /* Minimum stack */
-	. = ALIGN(0x0010);
+	. = ALIGN(2);
 	_kernel_data_end = ABSOLUTE(.);
 
 	. = 0xC000; /* Kernel code region */

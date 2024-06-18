@@ -1,7 +1,5 @@
 #include "libc.h"
 
-/* This code was done by the PEC professors */
-
 /**************************************************************
 * Espera a que se pulse un pulsador (KEY) en la placa         *
 * y devuelve el numero del pulsador apretado cuando se suelta *

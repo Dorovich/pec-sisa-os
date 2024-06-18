@@ -1,4 +1,3 @@
 # Cosas por hacer
-- Comprobar que se entre bien al programa de usuario
-- Comprobar que funcione todo
+- Comprobar que funcione el task_switch
 - Documentación
