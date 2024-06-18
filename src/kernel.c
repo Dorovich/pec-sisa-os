@@ -5,8 +5,7 @@ extern void (*cpu_idle)(void);
 
 struct task_struct *current;
 static struct task_struct *idle_task;
-
-static struct task_struct task[NUM_TASKS];
+static struct task_struct tasks[NUM_TASKS];
 
 static struct list_head freequeue;
 static struct list_head readyqueue;
@@ -14,7 +13,7 @@ static struct list_head readyqueue;
 static uint8_t global_pid;
 static uint8_t global_quantum;
 
-static inline struct task_struct *list_pop_front_task_struct(struct list_head *l)
+static inline struct task_struct *list_pop_front_task(struct list_head *l)
 {
 	return list_entry(list_pop_front(l), struct task_struct, list);
 }
@@ -27,7 +26,7 @@ syscall_value_t sys_fork(void)
 	if (list_empty(&freequeue))
 		return -1;
 
-	new = list_pop_front_task_struct(&freequeue);
+	new = list_pop_front_task(&freequeue);
 
 	/* Copy current task_struct to the new one */
 	memcpy(new, current, sizeof(struct task_struct));
@@ -89,13 +88,13 @@ void sched_schedule(struct list_head *queue)
 	if (current->pid != 0) {
 		/* Save current and select another task */
 		list_add_tail(&current->list, queue);
-		next = list_pop_front_task_struct(&readyqueue);
+		next = list_pop_front_task(&readyqueue);
 	} else {
 		/* Switch to idle_task if none remain */
 		if (list_empty(&readyqueue))
 			next = idle_task;
 		else
-			next = list_pop_front_task_struct(&readyqueue);
+			next = list_pop_front_task(&readyqueue);
 	}
 
 	/* Task switch to next */
@@ -117,7 +116,7 @@ uint8_t sched_get_free_pid(void)
 
 static void sched_init_idle(void)
 {
-	idle_task = list_pop_front_task_struct(&freequeue);
+	idle_task = list_pop_front_task(&freequeue);
 
 	idle_task->pid = 0;
 	idle_task->quantum = SCHED_DEFAULT_QUANTUM;
@@ -127,34 +126,31 @@ static void sched_init_idle(void)
 
 static void sched_init_task1(void)
 {
-	struct task_struct *task1 = list_pop_front_task_struct(&freequeue);
+	struct task_struct *task1 = list_pop_front_task(&freequeue);
 
 	task1->pid = 1;
 	task1->quantum = SCHED_DEFAULT_QUANTUM;
-	task1->reg.pc = (unsigned int)&_user_code_start;
+	task1->reg.pc = (uint16_t)&_user_code_start;
 	task1->reg.psw = PSW_IE | PSW_USER_MODE;
 
 	/* Set task1 as current task */
-	global_quantum = task1->quantum;
-	current = task1;
+	sched_task_switch(task1);
 }
 
 void sched_init(void)
 {
 	int i;
 
-	/* Initialise tasks */
-	for (i = 0; i < NUM_TASKS; i++) {
-		task[i].pid = -1;
-		memset(&(&task[i])->regs, 0, sizeof(task[i].regs));
-	}
-
 	/* Initialise scheduling queues */
 	INIT_LIST_HEAD(&freequeue);
 	INIT_LIST_HEAD(&readyqueue);
 
-	for (i = 0; i < NUM_TASKS; i++)
-		list_add_tail(&(&task[i])->list, &freequeue);
+	/* Initialise tasks */
+	for (i = 0; i < NUM_TASKS; i++) {
+		tasks[i].pid = -1;
+		memset(&(&tasks[i])->regs, 0, sizeof(tasks[i].regs));
+		list_add_tail(&(&tasks[i])->list, &freequeue);
+	}
 
 	/* Setup idle and task1 for scheduling */
 	sched_init_idle();

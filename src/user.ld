@@ -14,15 +14,14 @@ SECTIONS
 		*(.rodata*)
 	}
 
-	. = ALIGN(0x1000);
+	. = ALIGN(0x0010);
 	.data : {
 		*(.data)
 		*(.data*)
 		*(.bss)
 		*(.bss*)
-		/* Give at least 0x100 bytes to the stack */
-		. += 0x100;
-		. = ALIGN(0x1000);
+		. += 0x200; /* Minimum stack */
+		. = ALIGN(0x0010);
 		_user_stack = ABSOLUTE(.);
 	}
 }

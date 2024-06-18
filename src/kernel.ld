@@ -5,36 +5,6 @@ ENTRY(_start)
 
 SECTIONS
 {
-	. = 0xC000; /* Kernel code region */
-	.text : {
-		_kernel_code_start = ABSOLUTE(.);
-		*(.text.start)
-		*(.text)
-		*(.text*)
-		*(.rodata)
-		*(.rodata*)
-		_kernel_code_end = ABSOLUTE(.);
-	}
-
-	. = 0x8000; /* Kernel data region */
-	_kernel_data_start = ABSOLUTE(.);
-
-	.data : {
-		*(.data)
-		*(.data*)
-		. += 8; /* else .data section does not exist */
-	}
-
-	.bss : {
-		_kernel_data_bss_start = ABSOLUTE(.);
-		*(.bss)
-		*(.bss*)
-		_kernel_data_bss_end = ABSOLUTE(.);
-	}
-	. += 0x100;
-
-	_kernel_data_end = ABSOLUTE(.);
-
 	. = 0x1000; /* User code & data region */
 	.user : {
 		_user_code_start = ABSOLUTE(.);
@@ -44,4 +14,33 @@ SECTIONS
 		*(.user.data)
 		_user_data_end = ABSOLUTE(.);
 	}
+
+	. = 0x8000; /* Kernel data region */
+	_kernel_data_start = ABSOLUTE(.);
+	.data : {
+		*(.data)
+		*(.data*)
+		. += 1; /* else .data section does not exist */
+	}
+	. = ALIGN(0x0010);
+	.bss : {
+		_kernel_data_bss_start = ABSOLUTE(.);
+		*(.bss)
+		*(.bss*)
+		_kernel_data_bss_end = ABSOLUTE(.);
+	}
+	. += 0x400; /* Minimum stack */
+	. = ALIGN(0x0010);
+	_kernel_data_end = ABSOLUTE(.);
+
+	. = 0xC000; /* Kernel code region */
+	_kernel_code_start = ABSOLUTE(.);
+	.text : {
+		*(.text.start)
+		*(.text)
+		*(.text*)
+		*(.rodata)
+		*(.rodata*)
+	}
+	_kernel_code_end = ABSOLUTE(.);
 }
