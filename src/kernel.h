@@ -31,7 +31,7 @@ extern void _kernel_data_end;
 #define EXC_INT         0xF
 
 #define INT_TIMER    0x0
-#define INT_KEY      0x1
+#define INT_BUTTON   0x1
 #define INT_SWITCH   0x2
 #define INT_KEYBOARD 0x3
 
@@ -46,25 +46,25 @@ extern void _kernel_data_end;
 struct task_struct {
 	union {
 		struct {
-			unsigned int r0;
-			unsigned int r1;
-			unsigned int r2;
-			unsigned int r3;
-			unsigned int r4;
-			unsigned int r5;
-			unsigned int r6;
-			unsigned int r7;
-			unsigned int pc;
-			unsigned int psw;
+			uint16_t r0;
+			uint16_t r1;
+			uint16_t r2;
+			uint16_t r3;
+			uint16_t r4;
+			uint16_t r5;
+			uint16_t r6;
+			uint16_t r7;
+			uint16_t pc;
+			uint16_t psw;
 		} reg;
-		unsigned int regs[10];
+		uint16_t regs[10];
 	};
 	uint8_t pid;
 	uint8_t quantum;
 	struct list_head list;
 };
 
-/* Sched functions */
+/* Scheduling */
 void sched_init(void);
 void sched_run(void);
 void sched_schedule(struct list_head *queue);

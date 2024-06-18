@@ -65,11 +65,11 @@
 	ld \res, 0(\res)	  ; res = *(table_start + iid*2)
 .endm
 
-.macro $save_current
+.macro $save_ctx addr
 	wrs s4, r0
-	;; Save state on current
-	$movei r0, current
+	$movei r0, \addr
 	ld r0, 0(r0)
+
 	st 2(r0), r1
 	st 4(r0), r2
 	st 6(r0), r3
@@ -79,20 +79,24 @@
 	st 14(r0), r7
 	rds r1, s4
 	st 0(r0), r1
+
 	rds r1, s1
 	st 16(r0), r1 		; save pc
+
 	rds r1, s0
 	st 18(r0), r1 		; save psw
 .endm
 
-.macro $restore_current
-	;; Restore state from current
-	$movei r0, current
+.macro $restore_ctx addr
+	$movei r0, \addr
 	ld r0, 0(r0)
+
 	ld r1, 18(r0)
 	wrs s0, r1 		; restore psw
+
 	ld r1, 16(r0)
 	wrs s1, r1 		; restore pc
+
 	ld r7, 14(r0)
 	ld r6, 12(r0)
 	ld r5, 10(r0)

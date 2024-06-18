@@ -16,7 +16,7 @@ _start:
 
 GSR_handler:
 	;; Save process state
-	$save_current
+	$save_ctx current
 
 	$movei r7, KERNEL_STACK_ADDR
 
@@ -73,7 +73,7 @@ invalid_syscall:
 	st 2(r0), r1 		; return error
 
 GSR_end:
-	$restore_current
+	$restore_ctx current
 	reti
 
 	.global cpu_idle
