@@ -23,11 +23,15 @@ typedef unsigned int syscall_value_t;
 
 static inline int _syscall(uint16_t service_number)
 {
+	int result;
 	__asm__(
-		"and r0, %0, %0\n\t"
-		"calls r0\n\t"
-		: : "r"(service_number)
+		"and r0, %0, %0\n"
+		"calls r0\n"
+		"and %1, r0, r0\n"
+		: "=r" (result)
+		: "r" (service_number)
 	);
+	return result;
 }
 
 #define fork()     ((int)_syscall(SYSCALL_FORK))

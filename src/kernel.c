@@ -34,7 +34,7 @@ syscall_value_t sys_fork(void)
 	new->reg.r1 = 0;
 	new->pid = sched_get_free_pid();
 
-	/* Place new to the readyqueue */
+	/* Place new on the readyqueue */
 	list_add_tail(&new->list, &readyqueue);
 
 	return new->pid;

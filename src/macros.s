@@ -58,11 +58,11 @@
 	jal	\p1, \p1
 .endm
 
-.macro $table_entry res iid table_start
+.macro $table_entry res id table_start
 	$movei \res, \table_start ; res = table_start
-	add \res, \res, \iid	  ; res = table_start + iid
-	add \res, \res, \iid 	  ; res = table_start + iid*2
-	ld \res, 0(\res)	  ; res = *(table_start + iid*2)
+	add \res, \res, \id	  ; res = table_start + id
+	add \res, \res, \id 	  ; res = table_start + id*2
+	ld \res, 0(\res)	  ; res = *(table_start + id*2)
 .endm
 
 .macro $save_ctx addr
